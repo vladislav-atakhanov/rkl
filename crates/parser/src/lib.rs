@@ -19,15 +19,8 @@ pub fn parse<'a>(content: &'a str) -> Result<Keyboard<'a>, String> {
     let value = s_expression::from_str(raw.as_str()).map_err(|_| "Parse error".to_string())?;
     let mut keyboard = Keyboard::default();
     keyboard.meta = meta;
-    let root = match value {
-        List(r) => r,
-        _ => return Err("Expected list".to_string()),
-    };
-    root.iter().try_for_each(|i| {
-        let lst = match i {
-            List(lst) => lst,
-            _ => return Err("Expected list".to_string()),
-        };
+    value.list()?.iter().try_for_each(|i| {
+        let lst = i.list()?;
         let fun = lst
             .first()
             .map_or(None, |f| match f {

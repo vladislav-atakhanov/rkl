@@ -46,24 +46,15 @@ fn parse_item(row: &[&str]) -> Option<Item> {
 
 pub fn parse<'a>(items: &[Expr<'a>]) -> Result<Matrix, String> {
     let mut matrix: Vec<Item> = Vec::with_capacity(items.len());
-    items
-        .iter()
-        .try_for_each(|x| {
-            if let List(row) = x {
-                let row = row
-                    .iter()
-                    .filter_map(|el| if let Atom(a) = el { Some(*a) } else { None });
-                let row: Vec<&str> = row.collect();
-                if let Some(m) = parse_item(row.as_slice()) {
-                    matrix.push(m);
-                    Ok(())
-                } else {
-                    Err(format!("Cannot parse {} items", row.len()))
-                }
-            } else {
-                Err("Expected list".to_string())
-            }
-        })
-        .map_err(|_| "".to_string())?;
+    items.iter().try_for_each(|x| {
+        let row = x.list()?.iter().filter_map(|el| el.atom().ok());
+        let row: Vec<&str> = row.collect();
+        if let Some(m) = parse_item(row.as_slice()) {
+            matrix.push(m);
+            Ok(())
+        } else {
+            Err(format!("Cannot parse {:?} items", row))
+        }
+    })?;
     Ok(Matrix(matrix))
 }

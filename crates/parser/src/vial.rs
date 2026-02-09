@@ -18,21 +18,15 @@ impl Vial {
     fn add(&mut self, key: Key, item: Item) -> Option<Item> {
         self.0.insert(key, item)
     }
-    fn len(&self) -> usize {
-        self.0.len()
-    }
 }
 
 pub fn parse<'a>(items: &[Expr<'a>]) -> Result<Vial, String> {
     let mut vial = Vial(HashMap::new());
     items.iter().try_for_each(|x| {
-        let row = match x {
-            List(r) => r.iter().filter_map(|e| match e {
-                Atom(s) => Some(*s),
-                _ => None,
-            }),
-            _ => return Err("Expected list".to_string()),
-        };
+        let row = x.list()?.iter().filter_map(|e| match e {
+            Atom(s) => Some(*s),
+            _ => None,
+        });
         let row: Vec<&str> = row.collect();
         let first = row.first().ok_or("Key not found".to_string())?;
         let key: Key = first
@@ -57,9 +51,5 @@ pub fn parse<'a>(items: &[Expr<'a>]) -> Result<Vial, String> {
         }
         Ok(())
     })?;
-    if items.len() == vial.len() {
-        Ok(vial)
-    } else {
-        Err("Some keys duplicates".to_string())
-    }
+    Ok(vial)
 }
