@@ -2,3 +2,25 @@
 # It is not intended for manual editing.
 version = 4
 
+[[package]]
+name = "kb"
+version = "0.1.0"
+dependencies = [
+ "parser",
+]
+
+[[package]]
+name = "keys"
+version = "0.1.0"
+
+[[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "keys",
+ "s-expression",
+]
+
+[[package]]
+name = "s-expression"
+version = "0.1.0"
