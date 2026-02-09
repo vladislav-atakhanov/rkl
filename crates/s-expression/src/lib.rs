@@ -69,7 +69,7 @@ fn tokenize(input: &str) -> Vec<&str> {
     tokens
 }
 
-fn parse<'a>(tokens: &mut Vec<&'a str>) -> Result<Expr<'a>, Error> {
+fn parse<'a>(tokens: &mut Vec<&'a str>) -> Result<Expr<'a>, ()> {
     let token = tokens.remove(0);
 
     match token {
@@ -84,20 +84,12 @@ fn parse<'a>(tokens: &mut Vec<&'a str>) -> Result<Expr<'a>, Error> {
             tokens.remove(0); // ')'
             Ok(Expr::List(list))
         }
-        ")" => Err(Error {}),
+        ")" => Err(()),
         _ => Ok(Expr::Atom(token)),
     }
 }
 
-pub struct Error {}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Some")
-    }
-}
-
-pub fn from_str<'a>(input: &'a str) -> Result<Expr<'a>, Error> {
+pub fn from_str<'a>(input: &'a str) -> Result<Expr<'a>, ()> {
     let mut tokens = tokenize(input);
     return parse(&mut tokens);
 }

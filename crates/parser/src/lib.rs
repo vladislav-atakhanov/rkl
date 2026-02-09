@@ -16,7 +16,7 @@ pub fn parse<'a>(content: &'a str) -> Result<Keyboard<'a>, String> {
         (content, "")
     };
     let raw = format!("({})", raw);
-    let value = s_expression::from_str(raw.as_str()).map_err(|err| err.to_string())?;
+    let value = s_expression::from_str(raw.as_str()).map_err(|_| "Parse error".to_string())?;
     let mut keyboard = Keyboard::default();
     keyboard.meta = meta;
     let root = match value {
