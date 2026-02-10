@@ -6,9 +6,6 @@ pub fn unwrap<'a>(expr: &'a Expr<'a>, ignore: Option<&HashSet<&str>>) -> Expr<'a
     let List(list) = expr else {
         return expr.clone();
     };
-    if ignore.is_some_and(|set| matches!(list.first(), Some(Atom(name)) if set.contains(name))) {
-        return List(vec![]);
-    }
     List(
         list.iter()
             .flat_map(|item| {
@@ -20,10 +17,8 @@ pub fn unwrap<'a>(expr: &'a Expr<'a>, ignore: Option<&HashSet<&str>>) -> Expr<'a
                 };
                 match *name {
                     "unwrap" => inner.iter().map(|arg| unwrap(arg, ignore)).collect(),
-                    _ => match unwrap(item, ignore) {
-                        List(xs) => xs,
-                        x => vec![x],
-                    },
+                    _ if ignore.is_some_and(|set| set.contains(name)) => vec![],
+                    _ => vec![unwrap(item, ignore)],
                 }
             })
             .collect(),
@@ -53,11 +48,15 @@ mod tests {
     #[test]
     fn real_unwrap() {
         assert(
-            r#"((unwrap
-                (defalias a b)
-                (deflayer c (unwrap d e))
-            ))"#,
             r#"(
+                (defsrc a b c d)
+                (unwrap
+                    (defalias a b)
+                    (deflayer c (unwrap d e))
+                )
+            )"#,
+            r#"(
+                (defsrc a b c d)
                 (defalias a b)
                 (deflayer c d e)
             )"#,
