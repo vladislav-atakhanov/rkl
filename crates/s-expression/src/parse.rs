@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expr<'a> {
     Atom(&'a str),
     List(Vec<Expr<'a>>),
@@ -20,6 +20,27 @@ impl<'a> Expr<'a> {
         match self {
             Expr::Atom(s) => Ok(*s),
             _ => return Err(format!("Expected atom, found {:?}", self)),
+        }
+    }
+    pub fn to_string(&'a self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl std::fmt::Display for Expr<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Atom(x) => write!(f, "{}", x),
+            Self::List(lst) => {
+                write!(f, "(")?;
+                lst.iter().enumerate().try_for_each(|(i, e)| {
+                    if i != 0 {
+                        write!(f, " ")?;
+                    }
+                    e.fmt(f)
+                })?;
+                write!(f, ")")
+            }
         }
     }
 }
