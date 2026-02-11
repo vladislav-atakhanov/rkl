@@ -9,12 +9,16 @@ fn main() -> Result<(), String> {
     let content = std::fs::read_to_string("./layout.txt").map_err(|e| e.to_string())?;
     let layout: Layout = content.parse()?;
 
-    // layout
-    //     .aliases
-    //     .iter()
-    //     .for_each(|(n, a)| println!("{} => {:?}", n, a));
-
-    // let keys_by_index: HashMap<KeyIndex, Key> = layout.keys.iter().map(|(k, i)| (*i, *k)).collect();
+    let keys_by_index: HashMap<KeyIndex, Key> = layout.keys.iter().map(|(k, i)| (*i, *k)).collect();
+    layout.layers.values().for_each(|l| {
+        println!("Layer {}", l.name);
+        let mut keys: Vec<_> = l.keys.iter().collect();
+        keys.sort_by_key(|(k, _)| *k);
+        for (k, a) in keys {
+            println!("{:?} => {:?}", keys_by_index.get(k).unwrap(), a);
+        }
+        println!();
+    });
 
     Ok(())
 }

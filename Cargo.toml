@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 parser = { path = "crates/parser" }
+keys = { path = "crates/keys" }
+s-expression = { path = "crates/s-expression" }
+log = "0.4.29"
+env_logger = "0.11.8"

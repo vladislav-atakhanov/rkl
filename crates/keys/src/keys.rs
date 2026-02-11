@@ -12,7 +12,7 @@ pub enum Key {
     LeftCtrl,  LeftMeta, LeftAlt, Space,                                       RightAlt,  RightMeta,   Menu,         RightCtrl, Left,   Down,       Right,    Kp0,              KpDot,      KpEnter,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct KeyIndex(u8);
 
 impl TryFrom<usize> for KeyIndex {
