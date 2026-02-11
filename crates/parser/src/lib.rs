@@ -8,14 +8,14 @@ mod vial;
 pub use vial::Vial;
 
 #[derive(Debug, Default)]
-pub struct Keyboard<'a> {
+pub struct Keyboard {
     pub matrix: matrix::Matrix,
     pub vial: Vial,
     pub source: HashMap<Key, KeyIndex>,
-    pub meta: &'a str,
+    pub meta: String,
 }
 
-pub fn parse<'a>(content: &'a str) -> Result<Keyboard<'a>, String> {
+pub fn parse(content: &str) -> Result<Keyboard, String> {
     let (raw, meta) = if let Some((before, after)) = content.split_once("---") {
         (after.trim(), before.trim())
     } else {
@@ -24,7 +24,7 @@ pub fn parse<'a>(content: &'a str) -> Result<Keyboard<'a>, String> {
     let raw = format!("({})", raw);
     let value = s_expression::from_str(raw.as_str()).map_err(|_| "Parse error".to_string())?;
     let mut keyboard = Keyboard::default();
-    keyboard.meta = meta;
+    keyboard.meta = meta.to_string();
     value.list()?.iter().try_for_each(|i| {
         let lst = i.list()?;
         let fun = lst.first().ok_or("Expected name")?.atom()?;

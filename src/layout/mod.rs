@@ -15,12 +15,11 @@ pub use layer::Override;
 use preprocess::preprocess;
 
 #[derive(Debug, Default)]
-pub struct Layout<'a> {
-    pub keys: HashMap<Key, KeyIndex>,
+pub struct Layout {
     pub layers: HashMap<String, Layer>,
-    pub keyboard: Keyboard<'a>,
+    pub keyboard: Keyboard,
 }
-impl Layout<'_> {
+impl Layout {
     fn new() -> Self {
         Self::default()
     }
@@ -82,7 +81,7 @@ impl Layout<'_> {
     }
 }
 
-impl FromStr for Layout<'_> {
+impl FromStr for Layout {
     type Err = String;
     fn from_str(content: &str) -> Result<Self, Self::Err> {
         let content = format!("({})", content);
@@ -104,17 +103,17 @@ impl FromStr for Layout<'_> {
                         };
                         let content = std::fs::read_to_string(format!("./keyboards/{}.txt", id))
                             .map_err(|e| e.to_string())?;
-                        let keyboard = parser::parse(content.as_str())?;
-                        layout.keys = keyboard.source;
-                        let src = Layer::from_keyboard(&layout.keys);
+                        layout.keyboard = parser::parse(content.as_str())?;
+                        let src = Layer::from_keyboard(&layout.keyboard.source);
                         layout.layers.insert(src.name.to_string(), src);
                     }
                     "deflayer" => {
                         let layer = Layer::from_def(params)?;
-                        if layer.keys.len() != layout.keys.len() {
+                        let keys = &layout.keyboard.source;
+                        if layer.keys.len() != keys.len() {
                             return Err(format!(
                                 "Syntax error: expected {}, found {} ({})",
-                                layout.keys.len(),
+                                keys.len(),
                                 layer.keys.len(),
                                 name
                             ));
@@ -122,7 +121,7 @@ impl FromStr for Layout<'_> {
                         layout.layers.insert(layer.name.to_string(), layer);
                     }
                     "deflayermap" => {
-                        let layer = Layer::from_map(params, &layout.keys)?;
+                        let layer = Layer::from_map(params, &layout.keyboard.source)?;
                         let mut l = layout.layer_from(layer.parent, layer.name)?;
                         l.keys.extend(layer.keys);
                         layout.layers.insert(l.name.to_string(), l);
@@ -171,7 +170,8 @@ impl FromStr for Layout<'_> {
 
                                 Ok(Override {
                                     key: layout
-                                        .keys
+                                        .keyboard
+                                        .source
                                         .get(key)
                                         .ok_or(format!("Key {:?} is not found", key))?
                                         .clone(),
