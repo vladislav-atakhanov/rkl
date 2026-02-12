@@ -22,27 +22,13 @@ impl Layout {
     fn new() -> Self {
         Self::default()
     }
-    fn prepare_layers(&mut self, aliases: &HashMap<String, Action>) {
+    fn prepare_layers(&mut self, aliases: &HashMap<String, Action>) -> Result<(), String> {
         let layer_names: Vec<String> = self.layers.keys().cloned().collect();
 
         for name in &layer_names {
-            let layer = self.layers.get(name).unwrap();
-            let updates: Vec<_> = layer
-                .keys
-                .iter()
-                .filter_map(|(&key, action)| {
-                    if let Action::Alias(alias) = action {
-                        aliases.get(alias).cloned().map(|a| (key, a))
-                    } else {
-                        None
-                    }
-                })
-                .collect();
-
-            if let Some(layer) = self.layers.get_mut(name) {
-                for (key, action) in updates {
-                    layer.keys.insert(key, action);
-                }
+            let layer = self.layers.get_mut(name).unwrap();
+            for action in layer.keys.values_mut() {
+                *action = action.resolve_aliases(aliases)?;
             }
         }
 
@@ -78,6 +64,7 @@ impl Layout {
             }
         }
         self.layers.remove("src");
+        Ok(())
     }
     fn layer_from(&self, parent: String, name: String) -> Result<Layer, String> {
         let Some(parent) = self
@@ -202,7 +189,7 @@ impl FromStr for Layout {
                 }
                 Ok(())
             })?;
-        layout.prepare_layers(&aliases);
+        layout.prepare_layers(&aliases)?;
         Ok(layout)
     }
 }

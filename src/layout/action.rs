@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use keys::keys::Key;
 use log::warn;
 use s_expression::Expr::{self, *};
@@ -5,53 +7,40 @@ use s_expression::Expr::{self, *};
 #[derive(Debug, Clone)]
 pub enum Action {
     Tap(Key),
-    Release(Key),
-    Hold(Key),
     Transparent,
     NoAction,
     Alias(String),
-    MouseWheelUp,
-    MouseWheelDown,
-    MediaPlayPause,
     TapHold(Box<Action>, Box<Action>),
     Multi(Vec<Action>),
-    Macro(Vec<Action>),
     LayerWhileHeld(String),
     LayerSwitch(String),
+    Unicode(char),
 }
 
 impl Action {
-    pub fn unicode(ch: char) -> Result<Self, String> {
-        Ok(match ch {
-            '=' => Self::Tap(Key::KpEqual),
-            '+' => Self::Tap(Key::KpPlus),
-            '-' => Self::Tap(Key::KpMinus),
-            '*' => Self::Tap(Key::KpAsterisk),
-            '/' => Self::Tap(Key::KpSlash),
-            '0'..='9' => Self::Tap(Key::from_digit(ch)),
+    // pub fn unicode(ch: char) -> Result<Self, String> {
+    //     Ok()
+    // }
 
-            x if x.is_ascii() && !x.is_control() => {
-                let mut keys = vec![Self::Hold(Key::LeftAlt)];
-                let digits = (x as u8)
-                    .to_string()
-                    .chars()
-                    .map(|c| {
-                        Ok(Self::Tap(match c {
-                            '0'..='9' => Key::from_digit(c),
-                            _ => return Err(format!("Expected digit, found {:?}", c)),
-                        }))
-                    })
-                    .collect::<Result<Vec<_>, _>>()?;
-
-                keys.extend(digits);
-                keys.push(Action::Release(Key::LeftAlt));
-
-                Action::Macro(keys)
-            }
-            _ => {
-                return Err(format!("Non-ASCII character {:?} ({})", ch, ch as u32));
-            }
-        })
+    pub fn resolve_aliases(&self, aliases: &HashMap<String, Action>) -> Result<Action, String> {
+        let res = match self {
+            Action::Alias(name) => aliases
+                .get(name)
+                .map(|a| a.resolve_aliases(aliases))
+                .ok_or(format!("Alias @{} not found", name))?,
+            Action::TapHold(tap, hold) => Ok(Action::TapHold(
+                Box::new(tap.resolve_aliases(aliases)?),
+                Box::new(hold.resolve_aliases(aliases)?),
+            )),
+            Action::Multi(actions) => Ok(Action::Multi(
+                actions
+                    .iter()
+                    .map(|a| a.resolve_aliases(aliases))
+                    .collect::<Result<_, _>>()?,
+            )),
+            _ => Ok(self.clone()),
+        };
+        return res;
     }
 
     pub fn from_expr(expr: &Expr) -> Result<Action, String> {
@@ -60,13 +49,7 @@ impl Action {
                 if let Some(d) = e.strip_prefix(".")
                     && d.len() > 0
                 {
-                    match Self::unicode(d.chars().next().ok_or("Expected symbol".to_string())?) {
-                        Ok(a) => a,
-                        Err(msg) => {
-                            warn!("{}", msg);
-                            Self::NoAction
-                        }
-                    }
+                    Self::Unicode(d.chars().next().unwrap())
                 } else if let Some(d) = e.strip_prefix("@")
                     && e.len() > 1
                 {
@@ -88,11 +71,8 @@ impl Action {
                     match *e {
                         "X" => Action::NoAction,
                         "_" => Action::Transparent,
-                        "lb" => Self::unicode('(')?,
-                        "rb" => Self::unicode(')')?,
-                        "MouseWheelUp" | "mwup" => Action::MouseWheelUp,
-                        "MouseWheelDown" | "mwdn" => Action::MouseWheelDown,
-                        "MediaPlayPause" => Action::MediaPlayPause,
+                        "lb" => Self::Unicode('('),
+                        "rb" => Self::Unicode(')'),
                         k => Action::Tap(k.parse().map_err(|_| format!("Unknown key {:?}", k))?),
                     }
                 }
