@@ -177,6 +177,20 @@ impl FromStr for Layout {
                     return Err("Exprected name".to_string());
                 };
                 match name.atom()? {
+                    "defsrc" => {
+                        let keymap = parser::parse_keymap(&params.to_vec())?;
+                        let mut km: Vec<_> = keymap.iter().collect();
+                        km.sort_by_key(|(_, i)| *i);
+                        let src = layout.keyboard.source.len();
+                        let dst = keymap.len();
+                        if src != 0 && src != dst {
+                            return Err(format!("Expected {} keys, found {}", src, dst));
+                        }
+                        layout.keyboard.source = keymap;
+
+                        let src = Layer::from_keyboard(&layout.keyboard.source);
+                        layout.layers.insert(src.name.to_string(), src);
+                    }
                     "keyboard" => {
                         let [Atom(id)] = params else {
                             return Err("Syntax error".to_string());

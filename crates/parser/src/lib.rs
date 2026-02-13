@@ -5,6 +5,7 @@ use keys::keys::{Key, KeyIndex};
 mod matrix;
 mod vial;
 
+use s_expression::Expr;
 pub use vial::{Item as VialItem, Vial};
 
 #[derive(Debug, Default)]
@@ -13,6 +14,25 @@ pub struct Keyboard {
     pub vial: Vial,
     pub source: HashMap<Key, KeyIndex>,
     pub meta: String,
+}
+
+pub fn parse_keymap(lst: &Vec<Expr>) -> Result<HashMap<Key, KeyIndex>, String> {
+    lst.iter()
+        .enumerate()
+        .try_fold(HashMap::with_capacity(lst.len()), |mut acc, (i, expr)| {
+            let key: Key = expr
+                .atom()?
+                .parse()
+                .map_err(|_| format!("Unknown key {}", expr))?;
+            if acc
+                .insert(key, i.try_into().map_err(|_| format!("Parse error"))?)
+                .is_some()
+            {
+                Err(format!("Key {:?} duplicate", key))
+            } else {
+                Ok(acc)
+            }
+        })
 }
 
 pub fn parse(content: &str) -> Result<Keyboard, String> {
@@ -38,22 +58,8 @@ pub fn parse(content: &str) -> Result<Keyboard, String> {
                 Ok(())
             }
             "source" => {
-                keyboard.source = HashMap::with_capacity(lst.len() - 1);
-                lst.iter().skip(1).enumerate().try_for_each(|(i, expr)| {
-                    let key: Key = expr
-                        .atom()?
-                        .parse()
-                        .map_err(|_| format!("Unknown key {}", expr))?;
-                    if keyboard
-                        .source
-                        .insert(key, i.try_into().map_err(|_| format!("Parse error"))?)
-                        .is_some()
-                    {
-                        Err(format!("Key {:?} duplicate", key))
-                    } else {
-                        Ok(())
-                    }
-                })
+                keyboard.source = parse_keymap(&lst[1..].to_vec())?;
+                Ok(())
             }
             _ => Err(format!("Unexpected {}", fun)),
         }
