@@ -459,6 +459,7 @@ dependencies = [
 name = "kb"
 version = "0.1.0"
 dependencies = [
+ "argh",
  "env_logger",
  "hidapi",
  "keys",

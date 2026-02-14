@@ -3,12 +3,33 @@ mod transform;
 
 use layout::Layout;
 
+use argh::FromArgs;
+
+#[derive(FromArgs, Debug)]
+/// kdl - keymap definition language
+struct Args {
+    /// input file path
+    #[argh(positional)]
+    file: String,
+
+    /// apply keymap to vial
+    #[argh(switch)]
+    vial: bool,
+}
+
 fn main() -> Result<(), String> {
     env_logger::init();
-    let content = std::fs::read_to_string("./layout.txt").map_err(|e| e.to_string())?;
+
+    let args: Args = argh::from_env();
+
+    let content = std::fs::read_to_string(args.file).map_err(|e| e.to_string())?;
     let layout: Layout = content.parse()?;
 
-    layout.vial(None)?;
+    if args.vial {
+        layout.vial(None)?;
+    } else {
+        println!("Keymap not applied")
+    }
 
     Ok(())
 }
