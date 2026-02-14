@@ -13,17 +13,22 @@ pub fn deftemplate<'a>(list: Vec<Expr<'a>>) -> Result<Templates<'a>, String> {
         let [Atom(x), List(args), value] = r else {
             return Err(format!("SyntaxError: {:?}", r));
         };
-        let mut names: Vec<&str> = args
+        let names = args
             .iter()
-            .filter_map(|a| if let Atom(x) = a { Some(*x) } else { None })
-            .collect();
-        names.dedup();
-        if names.len() == args.len() {
-            templates.insert(*x, Template(names, value.clone().clone()));
-            Ok(())
-        } else {
-            Err(format!("Expected unique atoms, found {:?}", args))
-        }
+            .try_fold(Vec::with_capacity(args.len()), |mut acc, expr| {
+                let x = expr.atom()?;
+                if !x.starts_with("$") {
+                    return Err(format!("Argument should start from $, found {:?}", x));
+                }
+                if acc.contains(&x) {
+                    return Err(format!("Argument {:?} already defined", x));
+                }
+                acc.push(x);
+                Ok(acc)
+            })?;
+
+        templates.insert(*x, Template(names, value.clone().clone()));
+        Ok(())
     })?;
     Ok(templates)
 }
