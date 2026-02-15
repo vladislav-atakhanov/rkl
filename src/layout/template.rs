@@ -89,13 +89,13 @@ mod tests {
 
     #[test]
     fn parse() {
-        let expr = s_expression::from_str("(a (b c) c)").unwrap();
+        let expr = s_expression::from_str("(a ($b $c) $c)").unwrap();
         let list = expr.list().unwrap();
         let templates = deftemplate(list.clone()).unwrap();
 
         assert_eq!(
             templates,
-            HashMap::from([("a", Template(vec!["b", "c"], Atom("c")))]),
+            HashMap::from([("a", Template(vec!["$b", "$c"], Atom("$c")))]),
         );
     }
 
@@ -107,7 +107,7 @@ mod tests {
 
     #[test]
     fn apply_test() {
-        let expr = s_expression::from_str("(a (b c) c)").unwrap();
+        let expr = s_expression::from_str("(a ($b $c) $c)").unwrap();
         let list = expr.list().unwrap();
         let templates = &deftemplate(list.clone()).unwrap();
 
@@ -116,7 +116,7 @@ mod tests {
 
     #[test]
     fn apply_template_args() {
-        let expr = s_expression::from_str("(a (b c) c)").unwrap();
+        let expr = s_expression::from_str("(a ($b $c) $c)").unwrap();
         let list = expr.list().unwrap();
         let templates = &deftemplate(list.clone()).unwrap();
 
@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn args_duplicates() {
-        let expr = s_expression::from_str("(a (a a) a)").unwrap();
+        let expr = s_expression::from_str("(a ($a $a) $a)").unwrap();
         let list = expr.list().unwrap();
         assert!(deftemplate(list.clone()).is_err())
     }

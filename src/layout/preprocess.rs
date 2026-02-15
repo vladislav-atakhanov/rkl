@@ -38,7 +38,7 @@ mod tests {
     fn preprocess_aliases() {
         assert(
             r#"(
-                (deftemplate app (x) (multi meta x))
+                (deftemplate app ($x) (multi meta $x))
                 (defalias
                     a0 (app 0)
                     a1 (app 1)
