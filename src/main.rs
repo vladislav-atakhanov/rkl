@@ -15,6 +15,10 @@ struct Args {
     /// apply keymap to vial
     #[argh(switch)]
     vial: bool,
+
+    /// generate kanata config
+    #[argh(option)]
+    kanata: Option<String>,
 }
 
 fn main() -> Result<(), String> {
@@ -27,6 +31,15 @@ fn main() -> Result<(), String> {
 
     if args.vial {
         layout.vial(None)?;
+    } else if let Some(a) = args.kanata {
+        let text = layout.kanata()?;
+        match a.as_str() {
+            "-" => println!("{}", text),
+            filename => {
+                std::fs::write(filename, text).map_err(|e| e.to_string())?;
+                println!("Wrote to {}", filename)
+            }
+        }
     } else {
         println!("Keymap not applied")
     }

@@ -1,5 +1,6 @@
 mod macros;
 mod tapdance;
+use super::super::config;
 pub use super::keycode::Keycode;
 pub use macros::{Macro, MacroAction};
 pub use tapdance::TapDance;
@@ -28,7 +29,7 @@ impl VialAction {
             hold: hold,
             double_tap: Keycode(0),
             tap_hold: Keycode(0),
-            tapping_term: 200,
+            tapping_term: config::TAP_HOLD_MS as u16,
         })
     }
 }
