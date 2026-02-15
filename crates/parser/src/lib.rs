@@ -1,16 +1,15 @@
-use std::collections::HashMap;
-
-use keys::keys::{Key, KeyIndex};
-
 mod matrix;
 mod vial;
 
+use keys::keys::{Key, KeyIndex};
+pub use matrix::{Item as MatrixItem, Matrix, parse as parse_matix};
 use s_expression::Expr;
-pub use vial::{Item as VialItem, Vial};
+use std::collections::HashMap;
+pub use vial::{Item as VialItem, Vial, parse as parse_vial};
 
 #[derive(Debug, Default)]
 pub struct Keyboard {
-    pub matrix: matrix::Matrix,
+    pub matrix: Matrix,
     pub vial: Vial,
     pub source: HashMap<Key, KeyIndex>,
     pub meta: String,
@@ -54,15 +53,15 @@ pub fn parse(keyboard: &str) -> Result<Keyboard, String> {
         let lst = i.list()?;
         let fun = lst.first().ok_or("Expected name")?.atom()?;
         match fun {
-            "matrix" => {
-                keyboard.matrix = matrix::parse(&lst[1..])?;
+            "defmatrix" => {
+                keyboard.matrix = parse_matix(&lst[1..])?;
                 Ok(())
             }
-            "vial" => {
-                keyboard.vial = vial::parse(&lst[1..])?;
+            "defvial" => {
+                keyboard.vial = parse_vial(&lst[1..])?;
                 Ok(())
             }
-            "source" => {
+            "defsrc" => {
                 keyboard.source = parse_keymap(&lst[1..].to_vec())?;
                 Ok(())
             }

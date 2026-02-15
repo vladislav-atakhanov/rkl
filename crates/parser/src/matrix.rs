@@ -4,7 +4,7 @@ use s_expression::Expr;
 #[allow(unused)]
 #[rustfmt::skip]
 #[derive(Debug)]
-struct Item {
+pub struct Item {
     key: Key,
     x: f32, y: f32, w: f32, h: f32,
     r: f32, rx: f32, ry: f32

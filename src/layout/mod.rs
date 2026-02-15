@@ -1,4 +1,4 @@
-use parser::Keyboard;
+use parser::{Keyboard, parse_vial};
 use s_expression::Expr::*;
 use std::{
     collections::{HashMap, HashSet},
@@ -295,6 +295,7 @@ impl FromStr for Layout {
                             .collect::<Result<_, _>>()?;
                         layout.layers.insert(layer.name.to_string(), layer);
                     }
+                    "defvial" => layout.keyboard.vial = parse_vial(params)?,
 
                     _ => return Err(format!("Unexpected {}", name)),
                 }
