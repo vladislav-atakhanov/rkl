@@ -39,11 +39,11 @@ impl Layout {
             .collect())
     }
     pub fn vial(&self, device_id: Option<u16>) -> Result<(), String> {
-        let sorted = self.sorted_layers()?;
         let vial_items = self
             .keyboard
             .vial
             .ok_or("Vial is not defined".to_string())?;
+        let sorted = self.sorted_layers()?;
         let api = HidApi::new().map_err(|e| e.to_string())?;
 
         let layers_by_name: HashMap<&str, usize> = sorted

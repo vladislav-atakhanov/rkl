@@ -1,4 +1,5 @@
 use keys::keys::Key;
+use std::collections::HashSet;
 use vitaly::protocol::KeyOverride;
 
 use crate::transform::vial::keycode::key_to_mod;
@@ -15,15 +16,14 @@ pub struct Override {
 
 impl Override {
     pub fn to_key_override(&self, layers_mask: u16, i: usize) -> KeyOverride {
-        let mut target = self.target_mods.clone();
-        target.extend(self.source_mods.clone());
+        let (source, target) = self.get_mods();
         KeyOverride {
             index: i as u8,
             ko_enabled: true,
             trigger: self.source.0,
             replacement: self.target.0,
             layers: layers_mask,
-            trigger_mods: mods_to_mask(&self.source_mods).unwrap(),
+            trigger_mods: mods_to_mask(&source).unwrap(),
             negative_mod_mask: 0,
             suppressed_mods: mods_to_mask(&target).unwrap(),
             ko_option_activation_trigger_down: true,
@@ -34,7 +34,21 @@ impl Override {
             ko_option_no_unregister_on_other_key_down: false,
         }
     }
+    fn get_mods(&self) -> (Vec<Key>, Vec<Key>) {
+        let set_a: HashSet<_> = self.source_mods.iter().cloned().collect();
+        let set_b: HashSet<_> = self.target_mods.iter().cloned().collect();
+
+        (
+            self.source_mods.clone(),
+            set_a
+                .difference(&set_b)
+                .chain(set_b.difference(&set_a))
+                .cloned()
+                .collect(),
+        )
+    }
 }
+
 fn mods_to_mask(mods: &Vec<Key>) -> Result<u8, String> {
     if mods.len() == 0 {
         return Ok(0);
@@ -64,6 +78,42 @@ mod tests {
         assert_eq!(
             bitmod_to_name(mods_to_mask(&[Key::LeftCtrl, Key::RightMeta].to_vec()).unwrap()),
             "MOD_BIT_LCTRL|MOD_BIT_RGUI"
+        );
+    }
+
+    fn new(src: Vec<Key>, dst: Vec<Key>) -> Result<Override, String> {
+        let (src, src_mods) = src.split_last().unwrap();
+        let (dst, dst_mods) = dst.split_last().unwrap();
+        Ok(Override {
+            source: Keycode::from_key(src, 6)?,
+            source_mods: src_mods.to_vec(),
+            target_mods: dst_mods.to_vec(),
+            target: Keycode::from_key(dst, 6)?,
+        })
+    }
+
+    #[test]
+    fn get_mods() {
+        assert_eq!(
+            new([Key::A].to_vec(), [Key::B].to_vec(),)
+                .unwrap()
+                .get_mods(),
+            (vec![], vec![])
+        );
+        assert_eq!(
+            new(
+                [Key::LeftCtrl, Key::C].to_vec(),
+                [Key::LeftCtrl, Key::B].to_vec(),
+            )
+            .unwrap()
+            .get_mods(),
+            (vec![Key::LeftCtrl], vec![])
+        );
+        assert_eq!(
+            new([Key::LeftCtrl, Key::B].to_vec(), [Key::B].to_vec(),)
+                .unwrap()
+                .get_mods(),
+            (vec![Key::LeftCtrl], vec![Key::LeftCtrl])
         );
     }
 }
