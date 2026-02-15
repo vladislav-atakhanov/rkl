@@ -41,6 +41,50 @@ impl Action {
         return res;
     }
 
+    pub fn layer_while_held_names(&self) -> Vec<&str> {
+        match self {
+            Action::LayerWhileHeld(name) => vec![name.as_str()],
+            Action::TapHold(tap, hold) => {
+                let mut v = tap.layer_while_held_names();
+                v.extend(hold.layer_while_held_names());
+                v
+            }
+            Action::Multi(actions) | Action::Sequence(actions) => {
+                actions.iter().flat_map(|a| a.layer_while_held_names()).collect()
+            }
+            _ => vec![],
+        }
+    }
+
+    pub fn contains_unicode(&self) -> bool {
+        match self {
+            Action::Unicode(_) => true,
+            Action::TapHold(tap, hold) => tap.contains_unicode() || hold.contains_unicode(),
+            Action::Multi(actions) | Action::Sequence(actions) => {
+                actions.iter().any(|a| a.contains_unicode())
+            }
+            _ => false,
+        }
+    }
+
+    pub fn map_layer_while_held(&mut self, f: &impl Fn(&str) -> Option<String>) {
+        match self {
+            Action::LayerWhileHeld(name) => {
+                if let Some(new) = f(name) {
+                    *name = new;
+                }
+            }
+            Action::TapHold(tap, hold) => {
+                tap.map_layer_while_held(f);
+                hold.map_layer_while_held(f);
+            }
+            Action::Multi(actions) | Action::Sequence(actions) => {
+                actions.iter_mut().for_each(|a| a.map_layer_while_held(f));
+            }
+            _ => {}
+        }
+    }
+
     pub fn from_expr(expr: &Expr) -> Result<Action, String> {
         Ok(match expr {
             Atom(e) => {

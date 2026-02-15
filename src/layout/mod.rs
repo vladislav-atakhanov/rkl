@@ -84,7 +84,7 @@ impl Layout {
                         }
                         if dep.keys.iter().all(|(_, v)| match l.keymap {
                             Keymap::En => false,
-                            Keymap::Ru => !matches!(v, Action::Unicode(_)),
+                            Keymap::Ru => !v.contains_unicode(),
                         }) {
                             return None;
                         }
@@ -93,11 +93,9 @@ impl Layout {
                         new.name = new_name.clone();
 
                         new.keys.values_mut().for_each(|v| {
-                            if let Action::LayerWhileHeld(x) = v
-                                && x == name
-                            {
-                                *v = Action::LayerWhileHeld(new_name.clone())
-                            }
+                            v.map_layer_while_held(&|x| {
+                                (x == *name).then(|| new_name.clone())
+                            });
                         });
 
                         new.keymap = l.keymap.clone();
@@ -109,12 +107,11 @@ impl Layout {
                 if new.len() > 0 {
                     let mut s = l.clone();
                     s.keys.values_mut().for_each(|v| {
-                        if let Action::LayerWhileHeld(x) = v
-                            && copies.contains(x)
-                        {
-                            let name = format!("{}-{:?}", x, l.keymap).to_lowercase();
-                            *v = Action::LayerWhileHeld(name)
-                        }
+                        v.map_layer_while_held(&|x| {
+                            copies
+                                .contains(x)
+                                .then(|| format!("{}-{:?}", x, l.keymap).to_lowercase())
+                        });
                     });
                     new.push(s);
                 }

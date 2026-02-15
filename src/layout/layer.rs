@@ -89,11 +89,9 @@ impl Layer {
     pub fn get_dependencies(&self) -> Vec<&str> {
         let mut layers: Vec<_> = self
             .keys
-            .iter()
-            .filter_map(|(_, k)| match k {
-                Action::LayerWhileHeld(x) if *x != self.name => Some(x.as_str()),
-                _ => None,
-            })
+            .values()
+            .flat_map(|k| k.layer_while_held_names())
+            .filter(|x| *x != self.name)
             .collect();
         layers.dedup();
         layers

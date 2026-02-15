@@ -4,7 +4,7 @@ use std::str::FromStr;
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum Key {
     Fn(u8),    F13,      F14,     F15,   F16,  F17,  F18, F19,    F20,   F21,  F22,       F23,         F24,                     VolumeUp, VolumeDown, VolumeMute,
-    Esc,       F1,       F2,      F3,    F4,   F5,   F6,  F7,     F8,    F9,   F10,       F11,         F12,                     Print,  ScrollLock, Pause,
+    Esc,       F1,       F2,      F3,    F4,   F5,   F6,  F7,     F8,    F9,   F10,       F11,         F12,                     PrintScreen,  ScrollLock, Pause,
     Grave,     One,      Two,     Three, Four, Five, Six, Seven,  Eight, Nine, Zero,      Minus,       Equal,        Backspace, Insert, Home,       PageUp,   Numlock, KpSlash, KpAsterisk, KpMinus,
     Tab,       Q,        W,       E,     R,    T,    Y,   U,      I,     O,    P,         LeftBracket, RightBracket, Backslash, Delete, End,        PageDown, Kp7,     Kp8,     Kp9,        KpPlus,
     CapsLock,  A,        S,       D,     F,    G,    H,   J,      K,     L,    Semicolon, Apostrophe,                    Enter,                               Kp4,     Kp5,     Kp6,
@@ -107,11 +107,11 @@ impl FromStr for Key {
             "KeyF22" | "f22" => Self::F22,
             "KeyF23" | "f23" => Self::F23,
             "KeyF24" | "f24" => Self::F24,
-            "PrintScreen" => Self::Print,
+            "PrintScreen" => Self::PrintScreen,
             "ScrollLock" => Self::ScrollLock,
             "Pause" => Self::Pause,
 
-            "Backquote" | "`" => Self::Grave,
+            "Backquote" | "`" | "grv" => Self::Grave,
             "Digit1" | "1" => Self::One,
             "Digit2" | "2" => Self::Two,
             "Digit3" | "3" => Self::Three,
@@ -124,7 +124,7 @@ impl FromStr for Key {
             "Digit0" | "0" => Self::Zero,
             "Minus" | "-" => Self::Minus,
             "Equal" | "=" => Self::Equal,
-            "Backspace" | "bks" => Self::Backspace,
+            "Backspace" | "bks" | "bspc" => Self::Backspace,
             "Insert" | "ins" => Self::Insert,
             "Home" | "home" => Self::Home,
             "PageUp" | "pgup" => Self::PageUp,

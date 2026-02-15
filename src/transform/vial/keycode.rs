@@ -135,7 +135,7 @@ pub fn key_to_string(key: &Key) -> &str {
         Key::VolumeMute => "KC_AUDIO_MUTE",
         Key::Esc => "KC_ESCAPE",
 
-        Key::Print => "KC_PRINT_SCREEN",
+        Key::PrintScreen => "KC_PRINT_SCREEN",
         Key::ScrollLock => "KC_SCROLL_LOCK",
         Key::Pause => "KC_PAUSE",
         Key::Grave => "KC_GRAVE",
