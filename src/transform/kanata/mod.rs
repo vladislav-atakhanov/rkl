@@ -1,9 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
 use super::config;
-use crate::layout::{Action, Layer, Layout};
+use crate::layout::{Action, Layout};
 use keys::keys::Key;
-use s_expression::Expr::{self, *};
 
 fn sorted<'a, K, V, I: Ord, R, F: Fn(&'a K, &'a V) -> (I, R)>(
     map: &'a HashMap<K, V>,

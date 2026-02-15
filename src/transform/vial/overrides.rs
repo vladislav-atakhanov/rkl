@@ -15,24 +15,24 @@ pub struct Override {
 }
 
 impl Override {
-    pub fn to_key_override(&self, layers_mask: u16, i: usize) -> KeyOverride {
+    pub fn to_key_override(&self, layers_mask: u16, i: usize) -> Result<KeyOverride, String> {
         let (source, target) = self.get_mods();
-        KeyOverride {
+        Ok(KeyOverride {
             index: i as u8,
             ko_enabled: true,
             trigger: self.source.0,
             replacement: self.target.0,
             layers: layers_mask,
-            trigger_mods: mods_to_mask(&source).unwrap(),
+            trigger_mods: mods_to_mask(&source)?,
             negative_mod_mask: 0,
-            suppressed_mods: mods_to_mask(&target).unwrap(),
+            suppressed_mods: mods_to_mask(&target)?,
             ko_option_activation_trigger_down: true,
             ko_option_activation_required_mod_down: true,
             ko_option_activation_negative_mod_up: true,
             ko_option_one_mod: false,
             ko_option_no_reregister_trigger: false,
             ko_option_no_unregister_on_other_key_down: false,
-        }
+        })
     }
     fn get_mods(&self) -> (Vec<Key>, Vec<Key>) {
         let set_a: HashSet<_> = self.source_mods.iter().cloned().collect();

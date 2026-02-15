@@ -33,10 +33,10 @@ impl Layout {
                 .collect(),
         )?;
         order.reverse();
-        Ok(order
+        order
             .into_iter()
-            .map(|n| self.layers.get(n).unwrap())
-            .collect())
+            .map(|n| self.layers.get(n).ok_or(format!("Layer {:?} not found", n)))
+            .collect()
     }
     pub fn vial(&self, device_id: Option<u16>) -> Result<(), String> {
         let vial_items = self
@@ -122,12 +122,12 @@ impl Layout {
             })
             .collect();
 
-        let key_overrides = vial
+        let key_overrides: Vec<_> = vial
             .overrides
             .iter()
             .enumerate()
             .map(|(i, (o, l))| o.to_key_override(*l, i))
-            .collect::<Vec<_>>();
+            .collect::<Result<_, _>>()?;
 
         if capabilities.vial_version > 0 {
             unlock_device(&device, &meta, false)?;
@@ -156,7 +156,9 @@ impl Layout {
                         .map_err(|e| e.to_string())?,
                     };
                 }
-                println!("Layer {}", sorted.get(layer_index).unwrap().name);
+                if let Some(layer) = sorted.get(layer_index) {
+                    println!("Layer {}", layer.name);
+                }
                 Ok::<_, String>(())
             })?;
 
@@ -371,7 +373,9 @@ impl<'a> Vial<'a> {
                     .collect::<Result<_, String>>()?;
 
                 let result = act.iter().skip(1).fold(vec![act[0].clone()], |mut acc, x| {
-                    if matches!(*acc.last().unwrap(), MacroAction::Tap(_))
+                    if acc
+                        .last()
+                        .is_some_and(|last| matches!(last, MacroAction::Tap(_)))
                         && matches!(x, MacroAction::Tap(_))
                     {
                         acc.push(MacroAction::Delay(0));

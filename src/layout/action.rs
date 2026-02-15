@@ -15,7 +15,9 @@ pub enum Action {
     LayerSwitch(String),
     Unicode(char),
     Sequence(Vec<Action>),
+    #[allow(dead_code)]
     Hold(Key),
+    #[allow(dead_code)]
     Release(Key),
 }
 
@@ -49,9 +51,10 @@ impl Action {
                 v.extend(hold.layer_while_held_names());
                 v
             }
-            Action::Multi(actions) | Action::Sequence(actions) => {
-                actions.iter().flat_map(|a| a.layer_while_held_names()).collect()
-            }
+            Action::Multi(actions) | Action::Sequence(actions) => actions
+                .iter()
+                .flat_map(|a| a.layer_while_held_names())
+                .collect(),
             _ => vec![],
         }
     }
@@ -89,9 +92,13 @@ impl Action {
         Ok(match expr {
             Atom(e) => {
                 if let Some(d) = e.strip_prefix(".")
-                    && d.len() > 0
+                    && !d.is_empty()
                 {
-                    Self::Unicode(d.chars().next().unwrap())
+                    Self::Unicode(
+                        d.chars()
+                            .next()
+                            .ok_or("Unicode prefix '.' requires a character".to_string())?,
+                    )
                 } else if let Some(d) = e.strip_prefix("@")
                     && e.len() > 1
                 {

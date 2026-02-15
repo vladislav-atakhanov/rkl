@@ -30,14 +30,20 @@ impl Layout {
         let layer_names: Vec<String> = self.layers.keys().cloned().collect();
 
         for name in &layer_names {
-            let layer = self.layers.get_mut(name).unwrap();
+            let layer = self
+                .layers
+                .get_mut(name)
+                .ok_or(format!("Layer {:?} not found", name))?;
             for action in layer.keys.values_mut() {
                 *action = action.resolve_aliases(aliases)?;
             }
         }
 
         for name in &layer_names {
-            let layer = self.layers.get(name).unwrap();
+            let layer = self
+                .layers
+                .get(name)
+                .ok_or(format!("Layer {:?} not found", name))?;
             let parent_name = layer.parent.clone();
             let updates: Vec<_> = layer
                 .keys
@@ -93,9 +99,7 @@ impl Layout {
                         new.name = new_name.clone();
 
                         new.keys.values_mut().for_each(|v| {
-                            v.map_layer_while_held(&|x| {
-                                (x == *name).then(|| new_name.clone())
-                            });
+                            v.map_layer_while_held(&|x| (x == *name).then(|| new_name.clone()));
                         });
 
                         new.keymap = l.keymap.clone();

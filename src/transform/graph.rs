@@ -39,7 +39,9 @@ pub fn priority_topo_sort<'a>(graph: &HashMap<&'a str, Node<'a>>) -> Result<Vec<
 
         if let Some(dependents) = reverse_graph.get(node) {
             for &dep in dependents {
-                let deg = in_degree.get_mut(dep).unwrap();
+                let deg = in_degree
+                    .get_mut(dep)
+                    .ok_or(format!("Unknown dependency {:?}", dep))?;
                 *deg -= 1;
 
                 if *deg == 0 {
