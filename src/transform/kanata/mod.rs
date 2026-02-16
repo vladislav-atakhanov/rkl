@@ -120,7 +120,7 @@ fn action_to_kanata(action: &Action) -> Result<String, String> {
     Ok(match action {
         Action::Tap(key) => key_to_kanata(key),
         Action::Transparent => "_".into(),
-        Action::NoAction => "X".into(),
+        Action::NoAction => "XX".into(),
         Action::Alias(a) => format!("@{}", a),
         Action::TapHold(tap, hold) => format!(
             "(tap-hold {} {} {} {})",
@@ -336,7 +336,7 @@ fn key_to_kanata(key: &Key) -> String {
         Key::KpMinus => "kp-".into(),
         Key::KpEqual => "kp=".into(),
 
-        Key::MediaPlayPause => "play".into(),
+        Key::MediaPlayPause => "pp".into(),
         Key::MouseCursorUp => todo!(),
         Key::MouseCursorDown => todo!(),
         Key::MouseCursorLeft => todo!(),

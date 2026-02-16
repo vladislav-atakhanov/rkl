@@ -41,7 +41,7 @@ fn main() -> Result<(), String> {
             }
         }
     } else {
-        println!("Keymap not applied")
+        eprintln!("Keymap not applied")
     }
 
     Ok(())
