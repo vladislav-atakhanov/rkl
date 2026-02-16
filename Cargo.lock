@@ -456,22 +456,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "kb"
-version = "0.1.0"
-dependencies = [
- "argh",
- "env_logger",
- "hidapi",
- "keys",
- "log",
- "parser",
- "s-expression",
- "serde",
- "serde_json",
- "vitaly",
-]
-
-[[package]]
 name = "keys"
 version = "0.1.0"
 
@@ -774,6 +758,22 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rkl"
+version = "0.1.0"
+dependencies = [
+ "argh",
+ "env_logger",
+ "hidapi",
+ "keys",
+ "log",
+ "parser",
+ "s-expression",
+ "serde",
+ "serde_json",
+ "vitaly",
 ]
 
 [[package]]
