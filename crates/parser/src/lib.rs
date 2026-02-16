@@ -36,7 +36,7 @@ pub fn parse_keymap(lst: &Vec<Expr>) -> Result<HashMap<Key, KeyIndex>, String> {
 
 pub fn parse(keyboard: &str) -> Result<Keyboard, String> {
     let content = match keyboard {
-        "imperial44" => include_str!("keyboards/imperial44.txt"),
+        "imperial44" => include_str!("keyboards/imperial44.rkl"),
         _ => return Err(format!("Keyboard {:?} not found", keyboard)),
     };
 

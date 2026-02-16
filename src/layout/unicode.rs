@@ -7,7 +7,7 @@ pub fn unicode(
     lang: &Keymap,
     keymaps: &HashMap<Keymap, Action>,
 ) -> Result<Action, String> {
-    let content = format!("({})", include_str!("unicode.txt"));
+    let content = format!("({})", include_str!("unicode.rkl"));
     let expr = s_expression::from_str(content.as_str()).map_err(|_| "Parse error")?;
     let list = expr.list()?;
 
