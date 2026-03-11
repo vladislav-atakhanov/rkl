@@ -158,7 +158,14 @@ impl Action {
                         };
                         Action::LayerSwitch(name.to_string())
                     }
-                    _ => return Err(format!("Unknown action {}", name)),
+                    "macro" | "seq" => {
+                        let actions: Vec<Action> = params
+                            .into_iter()
+                            .map(|e| Self::from_expr(e))
+                            .collect::<Result<_, _>>()?;
+                        Action::Sequence(actions)
+                    }
+                    _ => return Err(format!("Unknown action {:?}", name)),
                 }
             }
         })
