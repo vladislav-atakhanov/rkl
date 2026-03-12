@@ -15,7 +15,7 @@ cargo build --release
 ## Использование
 
 ```bash
-raskl <file> [--kanata <output>] [--vial]
+rkl <file> [--kanata <output>] [--vial]
 ```
 
 | Флаг              | Описание                                                          |
@@ -24,9 +24,9 @@ raskl <file> [--kanata <output>] [--vial]
 | `--vial`          | Прошить раскладку в подключенную Vial-клавиатуру                  |
 
 ```bash
-raskl layout.rkl --kanata config.kbd   # записать в файл
-raskl layout.rkl --kanata -            # вывести в stdout
-raskl layout.rkl --vial                # прошить в устройство
+rkl layout.rkl --kanata config.kbd   # записать в файл
+rkl layout.rkl --kanata -            # вывести в stdout
+rkl layout.rkl --vial                # прошить в устройство
 ```
 
 ## Синтаксис

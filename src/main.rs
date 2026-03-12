@@ -6,7 +6,7 @@ use layout::Layout;
 use argh::FromArgs;
 
 #[derive(FromArgs, Debug)]
-/// kdl - keymap definition language
+/// rkl - keymap definition language
 struct Args {
     /// input file path
     #[argh(positional)]
